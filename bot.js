@@ -15,7 +15,6 @@ const strategies = require('./strategies');
 const afterLoss = require('./after-loss');
 const combined = require('./combined');
 const suitStreak = require('./suit-streak');
-const cardsCount = require('./cards-count');
 const formationRelay = require('./formation-relay');
 const shoeReport = require('./shoe-report');
 const aiRepair = require('./ai-repair');
@@ -30,7 +29,7 @@ const {
   initStrategies, setStrategyConfig, resetStrategy, strategyChannels, parityRuntime,
   bilanText, canSend, noteGateSent, gateView, autoView, noteSent, shadowRuntime, sweepAutoUnlock, unlockGate,
   fulfillAnnouncement, announcementsFor, queueFloor,
-  setOnAnnouncementSave, setOnAnnouncementDelete, restoreAnnouncements, restorePredictions,
+  setOnAnnouncementSave, setOnAnnouncementDelete, restoreAnnouncements,
 } = require('./predictor');
 
 let bot = null;
@@ -2058,11 +2057,6 @@ async function tick() {
     // déclenchement immédiat si aucune perte dans la série, sinon attente du
     // retour de ce costume avant de déclencher (voir suit-streak.js).
     await suitStreak.tick();
-
-    // panneau « Comptage 2/2 » : comptage des catégories 3/2, 3/3, 2/2 par
-    // lot de 30 jeux (1→30, 31→60, 61→90…) et prédictions 2/2 sur début+34/44/54
-    // déclenchées quand le jeu en live arrive à −3/−2 de la cible (voir cards-count.js).
-    await cardsCount.tick();
   } catch (e) {
     state.lastError = e.message;
   } finally {
@@ -2234,13 +2228,6 @@ async function applyDbConfigs() {
   await afterLoss.restoreFromDb();
   await combined.restoreFromDb();
   await suitStreak.restoreFromDb();
-  await cardsCount.restoreFromDb();
-  // bilans par stratégie (voir predictor.js/restorePredictions) : recharge
-  // depuis la base les prédictions encore « en attente » + les dernières
-  // résolues, pour que gagné/perdu/total ne repartent pas à zéro à chaque
-  // redémarrage du process.
-  const restoredCount = await restorePredictions();
-  if (restoredCount) console.log(`♻️  ${restoredCount} prédiction(s) restaurée(s) depuis la base pour les bilans.`);
   await shop.loadFromDb();
   await paiement.loadFromDb();
   await mirrorCounter.loadFromDb();
@@ -2290,8 +2277,6 @@ async function startLoop() {
   combined.setSender(senderFor);
   suitStreak.restore();
   suitStreak.setSender(senderFor);
-  cardsCount.restore();
-  cardsCount.setSender(senderFor);
   formationRelay.restore();
   formationRelay.setSender(senderFor);
   // Compteur « Taux Miroir » : édite le même message à chaque jeu terminé

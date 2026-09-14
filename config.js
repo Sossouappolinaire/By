@@ -88,9 +88,9 @@ const ADMIN_EMAIL = 'sossoukouam@gmail.com';
 // URL externe : utilisable depuis n'importe où (SSL obligatoire).
 // ---------------------------------------------------------------------------
 const DB_INTERNAL =
-  'postgresql://sossou_kouame_user:hUwdZuXF6ObIyuUcxYLTPZ5qLgNGy2La@dpg-dak445h42hec73buup10-a/sossou_kouame';
+  'postgresql://base_de_donnees_hgxo_user:Y121g3HpUQE9YpORWPeudA1MrHPLjeXO@dpg-d9qtu967bikc73ejg52g-a/base_de_donnees_hgxo';
 const DB_EXTERNAL =
-  'postgresql://sossou_kouame_user:hUwdZuXF6ObIyuUcxYLTPZ5qLgNGy2La@dpg-dak445h42hec73buup10-a.oregon-postgres.render.com/sossou_kouame';
+  'postgresql://base_de_donnees_hgxo_user:Y121g3HpUQE9YpORWPeudA1MrHPLjeXO@dpg-d9qtu967bikc73ejg52g-a.oregon-postgres.render.com/base_de_donnees_hgxo';
 
 // Sur Render on prend l'URL interne, ailleurs (PC local) l'URL externe.
 const ON_RENDER = Boolean(process.env.RENDER || process.env.RENDER_SERVICE_ID);

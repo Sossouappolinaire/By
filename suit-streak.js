@@ -188,12 +188,6 @@ function sanitizeTrackerFormat(value) {
   return fmt.clampFormat(value);
 }
 
-function sanitizeTrackerMaxR(value) {
-  if (value === null || value === undefined || value === '') return null;
-  const n = parseInt(value, 10);
-  return Number.isFinite(n) ? Math.max(0, Math.min(9, n)) : null;
-}
-
 function effectiveChannels(tracker) {
   return (tracker.channels && tracker.channels.length) ? tracker.channels : panel.channels;
 }
@@ -204,10 +198,6 @@ function effectiveSiteChannelId(tracker) {
 
 function effectiveFormat(tracker) {
   return tracker.format || panel.format;
-}
-
-function effectiveMaxR(tracker) {
-  return (tracker.maxR === null || tracker.maxR === undefined) ? panel.maxR : tracker.maxR;
 }
 
 function postToSiteChannel(tracker, text) {
@@ -267,7 +257,6 @@ function applySaved(saved) {
       channels: Array.isArray(t.channels) ? parseChannels(t.channels) : [],
       siteChannelId: sanitizeSiteChannelId(t.siteChannelId),
       format: t.format ? fmt.clampFormat(t.format) : null,
-      maxR: sanitizeTrackerMaxR(t.maxR),
       streakSuit: t.streakSuit || null,
       streakCount: Number.isFinite(Number(t.streakCount)) ? Number(t.streakCount) : 0,
       streakHasLoss: !!t.streakHasLoss,
@@ -312,7 +301,6 @@ function addTracker(key, extra = {}) {
     channels: parseChannels(extra.channels),
     siteChannelId: sanitizeSiteChannelId(extra.siteChannelId),
     format: sanitizeTrackerFormat(extra.format),
-    maxR: sanitizeTrackerMaxR(extra.maxR),
     streakSuit: null,
     streakCount: 0,
     streakHasLoss: false,
@@ -349,7 +337,6 @@ function updateTracker(id, patch = {}) {
   if (patch.channels !== undefined) tracker.channels = parseChannels(patch.channels);
   if (patch.siteChannelId !== undefined) tracker.siteChannelId = sanitizeSiteChannelId(patch.siteChannelId);
   if (patch.format !== undefined) tracker.format = sanitizeTrackerFormat(patch.format);
-  if (patch.maxR !== undefined) tracker.maxR = sanitizeTrackerMaxR(patch.maxR);
   persist();
   return tracker;
 }
@@ -422,7 +409,7 @@ function messageText(tracker, syn) {
     gameNumber: syn.target,
     suit: syn.suit,
     strategy: `${tracker.name} (série de costume)`,
-    maxR: effectiveMaxR(tracker),
+    maxR: panel.maxR,
     status: 'en attente',
     rattrapage: 0,
   }, null);
@@ -476,7 +463,7 @@ async function send(tracker, syn) {
     panel.pendingMessages.push({
       id: `p-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       trackerId: tracker.id, target: syn.target, suit: syn.suit, strategyName: tracker.name,
-      format: effectiveFormat(tracker), maxR: effectiveMaxR(tracker), step: 0, gap: 0, skipped: 0,
+      format: effectiveFormat(tracker), maxR: panel.maxR, step: 0, gap: 0, skipped: 0,
       status: 'en attente', messages: sentMessages, createdAt: Date.now(), resolvedAt: null,
     });
     if (panel.pendingMessages.length > 200) {
@@ -610,7 +597,7 @@ function statusView() {
     siteChannels: siteChannelsView().map((c) => ({ id: c.id, name: c.name })),
     trackers: panel.trackers.map((t) => ({
       id: t.id, key: t.key, name: t.name, n: t.n, mode: t.mode, offset: t.offset,
-      channels: t.channels, siteChannelId: t.siteChannelId, format: t.format, maxR: t.maxR,
+      channels: t.channels, siteChannelId: t.siteChannelId, format: t.format,
       streakSuit: t.streakSuit, streakCount: t.streakCount, streakHasLoss: t.streakHasLoss, waitingSuit: t.waitingSuit,
       sentCount: t.sentCount, lastSentAt: t.lastSentAt, createdAt: t.createdAt,
     })),
